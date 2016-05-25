@@ -14,7 +14,8 @@ object HazelcastBuild extends Build {
     hazelcastClient,
     spark,
     jcache,
-    junit
+    junit,
+    junitInterface
   )
   lazy val hazelcastSpark = Project(
     buildName,
@@ -22,9 +23,10 @@ object HazelcastBuild extends Build {
     settings = buildSettings ++ Seq(
       libraryDependencies ++= commonDeps,
       publishArtifact in Test := false,
+      crossPaths := false,
       publishMavenStyle := true,
       ivyXML := <dependencies>
-        <dependency org="com.hazelcast" name="hazelcast" rev={hazelcastVersion} conf="compile->default(compile);provided->default(compile)">
+        <dependency org="com.hazelcast" name="hazelcast" rev={hazelcastVersion} conf="compile->default(compile);provided->default(compile);test->default(compile)">
           <artifact name="hazelcast" type="jar" ext="jar" conf="compile"/>
           <artifact name="hazelcast" type="jar" ext="jar" conf="test" e:classifier="tests"/>
         </dependency>

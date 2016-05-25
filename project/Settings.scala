@@ -16,6 +16,7 @@ object Settings {
     scalaVersion := buildScalaVersion,
     shellPrompt := ShellPrompt.buildShellPrompt,
     resolvers += Resolver.mavenLocal,
+    parallelExecution in Test := false,
     test in assembly := {}
   )
 

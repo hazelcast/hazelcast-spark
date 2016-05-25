@@ -10,4 +10,6 @@ object Dependencies {
   // Test
   val junit = "junit" % "junit" % junitVersion % "test"
   val hazelcastTest = "com.hazelcast" % "hazelcast" % hazelcastVersion % "provided"  classifier "tests"
+  val junitInterface = "com.novocode" % "junit-interface" % "0.8" % "test->default"
+
 }

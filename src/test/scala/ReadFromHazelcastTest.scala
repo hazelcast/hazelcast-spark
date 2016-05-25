@@ -1,15 +1,19 @@
 
 import com.hazelcast.cache.impl.CacheProxy
 import com.hazelcast.core.HazelcastInstance
-import com.hazelcast.spark.connector.{HazelcastHelper, HazelcastRDD}
+import com.hazelcast.map.impl.proxy.MapProxyImpl
+import com.hazelcast.spark.connector.{HazelcastHelper, HazelcastRDD, toSparkContextFunctions}
 import com.hazelcast.test.HazelcastTestSupport
 import com.hazelcast.test.HazelcastTestSupport.randomName
-import connector.toSparkContextFunctions
+import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 import org.junit.Assert._
 import org.junit._
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 
-class ReadFromHazelcastTest extends HazelcastTestSupport {
+@RunWith(value = classOf[Parameterized])
+class ReadFromHazelcastTest(fromCache: Boolean) extends HazelcastTestSupport {
 
   var sparkContext: SparkContext = null
   var hazelcastInstance: HazelcastInstance = null
@@ -26,21 +30,31 @@ class ReadFromHazelcastTest extends HazelcastTestSupport {
   def after(): Unit = {
     System.clearProperty("hazelcast.test.use.network")
     System.clearProperty("hazelcast.local.localAddress")
-    hazelcastInstance.getLifecycleService.terminate()
     sparkContext.stop()
+    hazelcastInstance.getLifecycleService.terminate()
   }
 
   @Test
   def count(): Unit = {
-    val hazelcastRDD: HazelcastRDD[Int, Int] = getPrepopulatedRDD
+    val hazelcastRDD: HazelcastRDD[Int, Int] = getPrepopulatedRDD()
     val tuples: Array[(Int, Int)] = hazelcastRDD.collect()
 
+    tuples.foreach {
+      println
+    }
     assertEquals("Count should be ", 100, tuples.length)
   }
 
   @Test
+  def isEmpty(): Unit = {
+    val hazelcastRDD: HazelcastRDD[Int, Int] = getPrepopulatedRDD()
+    assertFalse(hazelcastRDD.isEmpty())
+  }
+
+
+  @Test
   def sortByKey(): Unit = {
-    val hazelcastRDD: HazelcastRDD[Int, Int] = getPrepopulatedRDD
+    val hazelcastRDD: HazelcastRDD[Int, Int] = getPrepopulatedRDD()
     val first = hazelcastRDD.sortByKey().first()
 
     assertEquals("First item should be", 1, first._1)
@@ -48,15 +62,23 @@ class ReadFromHazelcastTest extends HazelcastTestSupport {
 
   @Test
   def countByKey(): Unit = {
-    val hazelcastRDD: HazelcastRDD[Int, Int] = getPrepopulatedRDD
+    val hazelcastRDD: HazelcastRDD[Int, Int] = getPrepopulatedRDD()
     val map = hazelcastRDD.countByKey()
 
     assertTrue("All keys should have one value", map.forall({ case (k, v) => v == 1 }))
   }
 
   @Test
+  def countByValue(): Unit = {
+    val hazelcastRDD: HazelcastRDD[Int, Int] = getPrepopulatedRDD()
+    val map = hazelcastRDD.countByValue()
+
+    assertTrue("All values should appear once", map.forall({ case (k, v) => v == 1 }))
+  }
+
+  @Test
   def filter(): Unit = {
-    val hazelcastRDD: HazelcastRDD[Int, Int] = getPrepopulatedRDD
+    val hazelcastRDD: HazelcastRDD[Int, Int] = getPrepopulatedRDD()
     val filteredRDD = hazelcastRDD.filter { case (_, v) => v < 10 }
 
     assertTrue("All values should be less than 10", filteredRDD.values.collect().forall(_ < 10))
@@ -64,7 +86,7 @@ class ReadFromHazelcastTest extends HazelcastTestSupport {
 
   @Test
   def min(): Unit = {
-    val hazelcastRDD: HazelcastRDD[Int, Int] = getPrepopulatedRDD
+    val hazelcastRDD: HazelcastRDD[Int, Int] = getPrepopulatedRDD()
     val min = hazelcastRDD.min()
 
     assertEquals("min key should be one", 1, min._1)
@@ -73,29 +95,54 @@ class ReadFromHazelcastTest extends HazelcastTestSupport {
 
   @Test
   def max(): Unit = {
-    val hazelcastRDD: HazelcastRDD[Int, Int] = getPrepopulatedRDD
+    val hazelcastRDD: HazelcastRDD[Int, Int] = getPrepopulatedRDD()
     val max = hazelcastRDD.max()
 
     assertEquals("max key should be 100", 100, max._1)
     assertEquals("max value should be 100", 100, max._2)
   }
 
-  def getPrepopulatedRDD: HazelcastRDD[Int, Int] = {
-    val cacheName: String = randomName()
-    val cache: CacheProxy[Int, Int] = HazelcastHelper.getCacheFromServerProvider(cacheName, hazelcastInstance)
-    for (i <- 1 to 100) {
-      cache.put(i, i)
+  @Test
+  def flatMap(): Unit = {
+    val hazelcastRDD: HazelcastRDD[Int, Int] = getPrepopulatedRDD()
+    val values = hazelcastRDD.flatMap(e => List(e._2)).collect()
+
+    assertEquals(100, values.length)
+  }
+
+  def getPrepopulatedRDD(): HazelcastRDD[Int, Int] = {
+    val name: String = randomName()
+    if (fromCache) {
+      val cache: CacheProxy[Int, Int] = HazelcastHelper.getServerCacheProxy(name, hazelcastInstance)
+      for (i <- 1 to 100) {
+        cache.put(i, i)
+      }
+      val hazelcastRDD: HazelcastRDD[Int, Int] = sparkContext.fromHazelcastCache(name)
+      hazelcastRDD
+
+    } else {
+      val map: MapProxyImpl[Int, Int] = HazelcastHelper.getServerMapProxy(name, hazelcastInstance)
+      for (i <- 1 to 100) {
+        map.put(i, i)
+      }
+      val hazelcastRDD: HazelcastRDD[Int, Int] = sparkContext.fromHazelcastMap(name)
+      hazelcastRDD
     }
-    val hazelcastRDD: HazelcastRDD[Int, Int] = sparkContext.fromHazelcastCache(cacheName)
-    hazelcastRDD
   }
 
 
   def getSparkContext: SparkContext = {
-    val conf: SparkConf = new SparkConf().setMaster("local[8]").setAppName(this.getClass.getName)
+    val conf: SparkConf = new SparkConf().setMaster("local[4]").setAppName(this.getClass.getName)
       .set("spark.driver.host", "127.0.0.1")
       .set("hazelcast.server.address", "127.0.0.1:5701")
     new SparkContext(conf)
   }
 
 }
+
+object ReadFromHazelcastTest {
+  @Parameterized.Parameters(name = "fromCache = {0}") def parameters: java.util.Collection[Array[AnyRef]] = {
+    java.util.Arrays.asList(Array(Boolean.box(false)), Array(Boolean.box(true)))
+  }
+}
+
