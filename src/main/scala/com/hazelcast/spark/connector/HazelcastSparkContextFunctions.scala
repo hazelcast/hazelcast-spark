@@ -1,9 +1,9 @@
 package com.hazelcast.spark.connector
 
+import com.hazelcast.spark.connector.ConnectionManager.closeAll
+import com.hazelcast.spark.connector.Properties.{getServerAddress, isBatchingEnabled}
 import org.apache.spark.SparkContext
 import org.apache.spark.scheduler._
-
-import scala.util.Try
 
 class HazelcastSparkContextFunctions(@transient val sc: SparkContext) extends Serializable {
 
@@ -12,20 +12,12 @@ class HazelcastSparkContextFunctions(@transient val sc: SparkContext) extends Se
 
   def fromHazelcastCache[K, V](cacheName: String): HazelcastRDD[K, V] = {
     addCleanupListener()
-    new HazelcastRDD[K, V](sc, cacheName, true, getServerAddress, isBatchingEnabled)
+    new HazelcastRDD[K, V](sc, cacheName, true, getServerAddress(sc), isBatchingEnabled(sc))
   }
 
   def fromHazelcastMap[K, V](mapName: String): HazelcastRDD[K, V] = {
     addCleanupListener()
-    new HazelcastRDD[K, V](sc, mapName, false, getServerAddress, isBatchingEnabled)
-  }
-
-  private def isBatchingEnabled: Boolean = {
-    Try(sc.getConf.get("hazelcast.batch.values").toBoolean).getOrElse(true)
-  }
-
-  private def getServerAddress: String = {
-    sc.getConf.get("hazelcast.server.address")
+    new HazelcastRDD[K, V](sc, mapName, false, getServerAddress(sc), isBatchingEnabled(sc))
   }
 
   private def addCleanupListener(): Unit = {
@@ -45,7 +37,7 @@ class HazelcastSparkContextFunctions(@transient val sc: SparkContext) extends Se
           if (!sc.isStopped) {
             try {
               val workers = sc.getConf.getInt("spark.executor.instances", sc.getExecutorStorageStatus.length)
-              sc.parallelize(1 to workers, workers).setName(cleanupJobRddName).foreachPartition(it ⇒ ConnectionManager.closeAll())
+              sc.parallelize(1 to workers, workers).setName(cleanupJobRddName).foreachPartition(it ⇒ closeAll())
               jobIds -= jobEnd.jobId
             } catch {
               case e: Exception =>
