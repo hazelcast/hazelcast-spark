@@ -55,7 +55,7 @@ public class ReadFromHazelcastJavaTest extends HazelcastTestSupport {
 
         SparkConf conf = new SparkConf().setMaster("local[8]").setAppName(this.getClass().getName())
                 .set("hazelcast.server.addresses", "127.0.0.1:5701")
-                .set("hazelcast.server.group.name", GROUP_NAME)
+                .set("hazelcast.server.groupName", GROUP_NAME)
                 .set("spark.driver.host", "127.0.0.1");
         sparkContext = new JavaSparkContext(conf);
     }

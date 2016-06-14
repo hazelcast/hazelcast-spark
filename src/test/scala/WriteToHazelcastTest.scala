@@ -101,7 +101,7 @@ class WriteToHazelcastTest(toCache: Boolean) extends HazelcastTestSupport {
     val conf: SparkConf = new SparkConf().setMaster("local[8]").setAppName(this.getClass.getName)
       .set("spark.driver.host", "127.0.0.1")
       .set("hazelcast.server.addresses", "127.0.0.1:5701")
-      .set("hazelcast.server.group.name", groupName)
+      .set("hazelcast.server.groupName", groupName)
     new SparkContext(conf)
   }
 

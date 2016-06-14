@@ -52,7 +52,7 @@ object ConnectionUtil {
       config = new ClientConfig
       config.getGroupConfig.setName(conf.groupName)
       config.getGroupConfig.setPassword(conf.groupPass)
-      config.getNetworkConfig.setAddresses(JavaConversions.seqAsJavaList(Seq(member)))
+      config.getNetworkConfig.setAddresses(JavaConversions.seqAsJavaList(member.split(",")))
     }
     config.getNetworkConfig.setConnectionAttemptPeriod(100)
     config.getNetworkConfig.setConnectionAttemptLimit(1)

@@ -13,8 +13,8 @@ You can set the options below for the `SparkConf` object:
 Property name                                  | Description                                       | Default value      
 -----------------------------------------------|---------------------------------------------------|--------------------
 hazelcast.server.addresses                     | Comma separated list of hazelcast server addresses  | 127.0.0.1:5701    
-hazelcast.server.group.name                    | Group name of the Hazelcast Cluster | dev    
-hazelcast.server.group.pass                    | Group password of the Hazelcast Cluster | dev-pass
+hazelcast.server.groupName                    | Group name of the Hazelcast Cluster | dev    
+hazelcast.server.groupPass                    | Group password of the Hazelcast Cluster | dev-pass
 hazelcast.spark.valueBatchingEnabled           | If enabled, retrieves values from hazelcast in batches for better performance, if disabled, for each key connector will make a retrieve call to the cluster for retrieving the most recent value. | true   
 hazelcast.spark.readBatchSize                  | Number of entries to read in for each batch | 1000    
 hazelcast.spark.writeBatchSize                 | Number of entries to write in for each batch | 1000    
@@ -27,8 +27,8 @@ Scala :
 ```scala
 val conf = new SparkConf()
           .set("hazelcast.server.addresses", "127.0.0.1:5701")
-          .set("hazelcast.server.group.name", "dev")
-          .set("hazelcast.server.group.pass", "dev-pass")
+          .set("hazelcast.server.groupName", "dev")
+          .set("hazelcast.server.groupPass", "dev-pass")
           .set("hazelcast.spark.valueBatchingEnabled", "true")
           .set("hazelcast.spark.readBatchSize", "5000")
           .set("hazelcast.spark.writeBatchSize", "5000")
@@ -40,8 +40,8 @@ Java :
 
 SparkConf conf = new SparkConf()
           .set("hazelcast.server.addresses", "127.0.0.1:5701")
-          .set("hazelcast.server.group.name", "dev")
-          .set("hazelcast.server.group.pass", "dev-pass")
+          .set("hazelcast.server.groupName", "dev")
+          .set("hazelcast.server.groupPass", "dev-pass")
           .set("hazelcast.spark.valueBatchingEnabled", "true")
           .set("hazelcast.spark.readBatchSize", "5000")
           .set("hazelcast.spark.writeBatchSize", "5000")

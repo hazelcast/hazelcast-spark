@@ -10,8 +10,8 @@ object ConfigurationProperties {
   val WRITE_BATCH_SIZE_PROP: String = "hazelcast.spark.writeBatchSize"
   val BATCH_VALUES_PROP: String = "hazelcast.spark.valueBatchingEnabled"
   val SERVER_ADDRESS_PROP: String = "hazelcast.server.addresses"
-  val SERVER_GROUP_NAME_PROP: String = "hazelcast.server.group.name"
-  val SERVER_GROUP_PASS_PROP: String = "hazelcast.server.group.pass"
+  val SERVER_GROUP_NAME_PROP: String = "hazelcast.server.groupName"
+  val SERVER_GROUP_PASS_PROP: String = "hazelcast.server.groupPass"
   val CLIENT_XML_PATH_PROP: String = "hazelcast.spark.clientXmlPath"
 
   def getReadBatchSize(sc: SparkContext): Int = {
