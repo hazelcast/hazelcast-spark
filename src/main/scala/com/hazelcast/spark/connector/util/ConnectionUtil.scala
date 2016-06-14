@@ -54,8 +54,6 @@ object ConnectionUtil {
       config.getGroupConfig.setPassword(conf.groupPass)
       config.getNetworkConfig.setAddresses(JavaConversions.seqAsJavaList(member.split(",")))
     }
-    config.getNetworkConfig.setConnectionAttemptPeriod(100)
-    config.getNetworkConfig.setConnectionAttemptLimit(1)
     config
   }
 

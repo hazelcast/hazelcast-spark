@@ -13,13 +13,13 @@ import org.apache.spark.rdd.RDD
 import scala.collection.JavaConversions._
 
 class HazelcastRDDFunctions[K, V](val rdd: RDD[(K, V)]) extends Serializable {
-  val conf: SerializableConf = new SerializableConf(rdd.sparkContext)
+  val conf: SerializableConf = new SerializableConf(rdd.context)
 
   def saveToHazelcastCache(cacheName: String): Unit = {
     val job = (ctx: TaskContext, iterator: Iterator[(K, V)]) => {
       new HazelcastWriteToCacheJob().runJob(ctx, iterator, cacheName)
     }
-    addCleanupListener(rdd.sparkContext)
+    addCleanupListener(rdd.context)
     rdd.sparkContext.runJob(rdd, job)
 
   }
@@ -28,7 +28,7 @@ class HazelcastRDDFunctions[K, V](val rdd: RDD[(K, V)]) extends Serializable {
     val job = (ctx: TaskContext, iterator: Iterator[(K, V)]) => {
       new HazelcastWriteToMapJob().runJob(ctx, iterator, mapName)
     }
-    addCleanupListener(rdd.sparkContext)
+    addCleanupListener(rdd.context)
     rdd.sparkContext.runJob(rdd, job)
   }
 
