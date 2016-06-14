@@ -1,11 +1,14 @@
 
 import com.hazelcast.cache.impl.CacheProxy
+import com.hazelcast.config.Config
 import com.hazelcast.core.HazelcastInstance
+import com.hazelcast.instance.HazelcastInstanceFactory
 import com.hazelcast.map.impl.proxy.MapProxyImpl
-import com.hazelcast.spark.connector.{HazelcastHelper, HazelcastRDD, toSparkContextFunctions}
+import com.hazelcast.spark.connector.rdd.HazelcastRDD
+import com.hazelcast.spark.connector.toSparkContextFunctions
+import com.hazelcast.spark.connector.util.HazelcastUtil
 import com.hazelcast.test.HazelcastTestSupport
-import com.hazelcast.test.HazelcastTestSupport.randomName
-import org.apache.spark.rdd.RDD
+import com.hazelcast.test.HazelcastTestSupport._
 import org.apache.spark.{SparkConf, SparkContext}
 import org.junit.Assert._
 import org.junit._
@@ -17,12 +20,15 @@ class ReadFromHazelcastTest(fromCache: Boolean) extends HazelcastTestSupport {
 
   var sparkContext: SparkContext = null
   var hazelcastInstance: HazelcastInstance = null
+  val groupName: String = randomName()
 
   @Before
   def before(): Unit = {
     System.setProperty("hazelcast.test.use.network", "true")
     System.setProperty("hazelcast.local.localAddress", "127.0.0.1")
-    hazelcastInstance = createHazelcastInstance
+    val config: Config = getConfig
+    config.getGroupConfig.setName(groupName)
+    hazelcastInstance = createHazelcastInstance(config)
     sparkContext = getSparkContext
   }
 
@@ -30,8 +36,11 @@ class ReadFromHazelcastTest(fromCache: Boolean) extends HazelcastTestSupport {
   def after(): Unit = {
     System.clearProperty("hazelcast.test.use.network")
     System.clearProperty("hazelcast.local.localAddress")
+    hazelcastInstance.getLifecycleService.shutdown();
+    while (HazelcastInstanceFactory.getAllHazelcastInstances.size() > 0) {
+      sleepMillis(50)
+    }
     sparkContext.stop()
-    hazelcastInstance.getLifecycleService.terminate()
   }
 
   @Test
@@ -113,7 +122,7 @@ class ReadFromHazelcastTest(fromCache: Boolean) extends HazelcastTestSupport {
   def getPrepopulatedRDD(): HazelcastRDD[Int, Int] = {
     val name: String = randomName()
     if (fromCache) {
-      val cache: CacheProxy[Int, Int] = HazelcastHelper.getServerCacheProxy(name, hazelcastInstance)
+      val cache: CacheProxy[Int, Int] = HazelcastUtil.getServerCacheProxy(name, hazelcastInstance)
       for (i <- 1 to 100) {
         cache.put(i, i)
       }
@@ -121,7 +130,7 @@ class ReadFromHazelcastTest(fromCache: Boolean) extends HazelcastTestSupport {
       hazelcastRDD
 
     } else {
-      val map: MapProxyImpl[Int, Int] = HazelcastHelper.getServerMapProxy(name, hazelcastInstance)
+      val map: MapProxyImpl[Int, Int] = HazelcastUtil.getServerMapProxy(name, hazelcastInstance)
       for (i <- 1 to 100) {
         map.put(i, i)
       }
@@ -134,7 +143,8 @@ class ReadFromHazelcastTest(fromCache: Boolean) extends HazelcastTestSupport {
   def getSparkContext: SparkContext = {
     val conf: SparkConf = new SparkConf().setMaster("local[4]").setAppName(this.getClass.getName)
       .set("spark.driver.host", "127.0.0.1")
-      .set("hazelcast.server.address", "127.0.0.1:5701")
+      .set("hazelcast.server.addresses", "127.0.0.1:5701")
+      .set("hazelcast.server.group.name", groupName)
     new SparkContext(conf)
   }
 

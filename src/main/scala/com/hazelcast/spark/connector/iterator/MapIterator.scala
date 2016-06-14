@@ -1,9 +1,9 @@
-package com.hazelcast.spark.connector
+package com.hazelcast.spark.connector.iterator
 
 import java.util
-import javax.cache.Cache.Entry
+import java.util.Map.Entry
 
-class CacheIterator[K, V](val iterator: util.Iterator[Entry[K, V]]) extends Iterator[(K, V)] {
+class MapIterator[K, V](val iterator: util.Iterator[Entry[K, V]]) extends Iterator[(K, V)] {
   override def hasNext: Boolean = iterator.hasNext
 
   override def next(): (K, V) = {

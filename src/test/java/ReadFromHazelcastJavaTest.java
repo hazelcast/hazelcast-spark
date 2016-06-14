@@ -1,9 +1,11 @@
 import com.hazelcast.cache.impl.CacheProxy;
+import com.hazelcast.config.Config;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
-import com.hazelcast.spark.connector.HazelcastHelper;
-import com.hazelcast.spark.connector.HazelcastJavaRDD;
+import com.hazelcast.instance.HazelcastInstanceFactory;
 import com.hazelcast.spark.connector.HazelcastSparkContext;
+import com.hazelcast.spark.connector.rdd.HazelcastJavaRDD;
+import com.hazelcast.spark.connector.util.HazelcastUtil;
 import com.hazelcast.test.HazelcastTestSupport;
 import java.io.Serializable;
 import java.util.Arrays;
@@ -30,6 +32,8 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Parameterized.class)
 public class ReadFromHazelcastJavaTest extends HazelcastTestSupport {
 
+    public static final String GROUP_NAME = randomName();
+
     @Parameterized.Parameter
     public boolean fromCache;
 
@@ -45,10 +49,13 @@ public class ReadFromHazelcastJavaTest extends HazelcastTestSupport {
     public void setUp() throws Exception {
         System.setProperty("hazelcast.test.use.network", "true");
         System.setProperty("hazelcast.local.localAddress", "127.0.0.1");
-        server = createHazelcastInstance();
+        Config config = getConfig();
+        config.getGroupConfig().setName(GROUP_NAME);
+        server = createHazelcastInstance(config);
 
         SparkConf conf = new SparkConf().setMaster("local[8]").setAppName(this.getClass().getName())
-                .set("hazelcast.server.address", "127.0.0.1:5701")
+                .set("hazelcast.server.addresses", "127.0.0.1:5701")
+                .set("hazelcast.server.group.name", GROUP_NAME)
                 .set("spark.driver.host", "127.0.0.1");
         sparkContext = new JavaSparkContext(conf);
     }
@@ -56,6 +63,9 @@ public class ReadFromHazelcastJavaTest extends HazelcastTestSupport {
     @After
     public void tearDown() throws Exception {
         server.getLifecycleService().terminate();
+        while (HazelcastInstanceFactory.getAllHazelcastInstances().size() > 0) {
+            sleepMillis(50);
+        }
         sparkContext.stop();
     }
 
@@ -132,7 +142,7 @@ public class ReadFromHazelcastJavaTest extends HazelcastTestSupport {
         HazelcastSparkContext hazelcastSparkContext = new HazelcastSparkContext(sparkContext);
         String name = randomName();
         if (fromCache) {
-            CacheProxy<Integer, Integer> cacheProxy = HazelcastHelper.getServerCacheProxy(name, server);
+            CacheProxy<Integer, Integer> cacheProxy = HazelcastUtil.getServerCacheProxy(name, server);
             for (int i = 0; i < 100; i++) {
                 cacheProxy.put(i, i);
             }

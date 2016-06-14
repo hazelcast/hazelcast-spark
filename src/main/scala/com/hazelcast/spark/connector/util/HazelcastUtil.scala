@@ -1,4 +1,4 @@
-package com.hazelcast.spark.connector
+package com.hazelcast.spark.connector.util
 
 import javax.cache.{Cache, CacheManager}
 
@@ -6,13 +6,12 @@ import com.hazelcast.cache.impl.{CacheProxy, HazelcastServerCachingProvider}
 import com.hazelcast.client.cache.impl.{ClientCacheProxy, HazelcastClientCachingProvider}
 import com.hazelcast.client.proxy.ClientMapProxy
 import com.hazelcast.config.CacheConfig
-import com.hazelcast.config.EvictionConfig.MaxSizePolicy._
 import com.hazelcast.core.{HazelcastInstance, IMap}
 import com.hazelcast.map.impl.proxy.MapProxyImpl
 
 import scala.reflect.ClassTag
 
-object HazelcastHelper {
+object HazelcastUtil {
 
   def getClientMapProxy[K, V](name: String, instance: HazelcastInstance): ClientMapProxy[K, V] = {
     val map: IMap[K, V] = instance.getMap(name)
@@ -27,8 +26,6 @@ object HazelcastHelper {
     val cachingProvider: HazelcastClientCachingProvider = HazelcastClientCachingProvider.createCachingProvider(instance)
     val cacheManager: CacheManager = cachingProvider.getCacheManager()
     val cacheConfig: CacheConfig[K, V] = new CacheConfig[K, V](name)
-    //todo : do we really care about eviction ?
-    cacheConfig.getEvictionConfig.setMaximumSizePolicy(ENTRY_COUNT).setSize(Int.MaxValue)
     val cache: Cache[K, V] = cacheManager.createCache(name, cacheConfig)
     cache.asInstanceOf[ClientCacheProxy[K, V]]
   }
@@ -37,8 +34,6 @@ object HazelcastHelper {
     val cachingProvider: HazelcastServerCachingProvider = HazelcastServerCachingProvider.createCachingProvider(instance)
     val cacheManager: CacheManager = cachingProvider.getCacheManager()
     val cacheConfig: CacheConfig[K, V] = new CacheConfig[K, V](name)
-    //todo : do we really care about eviction ?
-    cacheConfig.getEvictionConfig.setMaximumSizePolicy(ENTRY_COUNT).setSize(Int.MaxValue)
     val cache: Cache[K, V] = cacheManager.createCache(name, cacheConfig)
     cache.asInstanceOf[CacheProxy[K, V]]
   }

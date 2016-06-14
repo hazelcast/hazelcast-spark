@@ -1,5 +1,6 @@
 package com.hazelcast.spark
 
+import com.hazelcast.spark.connector.rdd.HazelcastRDDFunctions
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 

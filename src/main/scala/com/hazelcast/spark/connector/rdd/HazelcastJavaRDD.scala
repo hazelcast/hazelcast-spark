@@ -1,4 +1,4 @@
-package com.hazelcast.spark.connector
+package com.hazelcast.spark.connector.rdd
 
 import org.apache.spark.api.java.JavaPairRDD
 

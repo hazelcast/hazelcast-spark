@@ -1,7 +1,10 @@
 import com.hazelcast.cache.impl.CacheProxy
+import com.hazelcast.config.Config
 import com.hazelcast.core.HazelcastInstance
+import com.hazelcast.instance.HazelcastInstanceFactory
 import com.hazelcast.map.impl.proxy.MapProxyImpl
-import com.hazelcast.spark.connector.{HazelcastHelper, toHazelcastRDDFunctions}
+import com.hazelcast.spark.connector.toHazelcastRDDFunctions
+import com.hazelcast.spark.connector.util.HazelcastUtil
 import com.hazelcast.test.HazelcastTestSupport
 import com.hazelcast.test.HazelcastTestSupport._
 import org.apache.spark.rdd.RDD
@@ -17,12 +20,15 @@ class WriteToHazelcastTest(toCache: Boolean) extends HazelcastTestSupport {
 
   var sparkContext: SparkContext = null
   var hazelcastInstance: HazelcastInstance = null
+  val groupName: String = randomName()
 
   @Before
   def before(): Unit = {
     System.setProperty("hazelcast.test.use.network", "true")
     System.setProperty("hazelcast.local.localAddress", "127.0.0.1")
-    hazelcastInstance = createHazelcastInstance
+    val config: Config = getConfig
+    config.getGroupConfig.setName(groupName)
+    hazelcastInstance = createHazelcastInstance(config)
     sparkContext = getSparkContext
   }
 
@@ -30,8 +36,11 @@ class WriteToHazelcastTest(toCache: Boolean) extends HazelcastTestSupport {
   def after(): Unit = {
     System.clearProperty("hazelcast.test.use.network")
     System.clearProperty("hazelcast.local.localAddress")
+    hazelcastInstance.getLifecycleService.shutdown();
+    while (HazelcastInstanceFactory.getAllHazelcastInstances.size() > 0) {
+      sleepMillis(500)
+    }
     sparkContext.stop()
-    hazelcastInstance.getLifecycleService.terminate()
   }
 
 
@@ -58,22 +67,22 @@ class WriteToHazelcastTest(toCache: Boolean) extends HazelcastTestSupport {
 
   def assertSize(name: String, size: Int) = {
     if (toCache) {
-      val cache: CacheProxy[Int, Long] = HazelcastHelper.getServerCacheProxy(name, hazelcastInstance)
+      val cache: CacheProxy[Int, Long] = HazelcastUtil.getServerCacheProxy(name, hazelcastInstance)
       assertEquals("Cache size should be " + size, size, cache.size())
     } else {
-      val map: MapProxyImpl[Int, Long] = HazelcastHelper.getServerMapProxy(name, hazelcastInstance)
+      val map: MapProxyImpl[Int, Long] = HazelcastUtil.getServerMapProxy(name, hazelcastInstance)
       assertEquals("Map size should be " + size, size, map.size())
     }
   }
 
   def assertValue(name: String, size: Int, value: Int) = {
     if (toCache) {
-      val cache: CacheProxy[Int, Long] = HazelcastHelper.getServerCacheProxy(name, hazelcastInstance)
+      val cache: CacheProxy[Int, Long] = HazelcastUtil.getServerCacheProxy(name, hazelcastInstance)
       for (i <- 1 to size) {
         assertEquals(value, cache.get(i))
       }
     } else {
-      val map: MapProxyImpl[Int, Long] = HazelcastHelper.getServerMapProxy(name, hazelcastInstance)
+      val map: MapProxyImpl[Int, Long] = HazelcastUtil.getServerMapProxy(name, hazelcastInstance)
       for (i <- 1 to size) {
         assertEquals(value, map.get(i))
       }
@@ -91,7 +100,8 @@ class WriteToHazelcastTest(toCache: Boolean) extends HazelcastTestSupport {
   def getSparkContext: SparkContext = {
     val conf: SparkConf = new SparkConf().setMaster("local[8]").setAppName(this.getClass.getName)
       .set("spark.driver.host", "127.0.0.1")
-      .set("hazelcast.server.address", "127.0.0.1:5701")
+      .set("hazelcast.server.addresses", "127.0.0.1:5701")
+      .set("hazelcast.server.group.name", groupName)
     new SparkContext(conf)
   }
 

@@ -1,5 +1,8 @@
 package com.hazelcast.spark.connector;
 
+import com.hazelcast.spark.connector.rdd.HazelcastJavaRDD;
+import com.hazelcast.spark.connector.rdd.HazelcastRDD;
+import com.hazelcast.spark.connector.util.HazelcastUtil;
 import org.apache.spark.api.java.JavaSparkContext;
 import scala.reflect.ClassTag;
 
@@ -18,15 +21,15 @@ public class HazelcastSparkContext {
 
     public <K, V> HazelcastJavaRDD<K, V> fromHazelcastCache(String cacheName) {
         HazelcastRDD<K, V> hazelcastRDD = hazelcastSparkContextFunctions.fromHazelcastCache(cacheName);
-        ClassTag<K> kt = HazelcastHelper.getClassTag();
-        ClassTag<V> vt = HazelcastHelper.getClassTag();
+        ClassTag<K> kt = HazelcastUtil.getClassTag();
+        ClassTag<V> vt = HazelcastUtil.getClassTag();
         return new HazelcastJavaRDD<K, V>(hazelcastRDD, kt, vt);
     }
 
     public <K, V> HazelcastJavaRDD<K, V> fromHazelcastMap(String mapName) {
         HazelcastRDD<K, V> hazelcastRDD = hazelcastSparkContextFunctions.fromHazelcastMap(mapName);
-        ClassTag<K> kt = HazelcastHelper.getClassTag();
-        ClassTag<V> vt = HazelcastHelper.getClassTag();
+        ClassTag<K> kt = HazelcastUtil.getClassTag();
+        ClassTag<V> vt = HazelcastUtil.getClassTag();
         return new HazelcastJavaRDD<K, V>(hazelcastRDD, kt, vt);
     }
 }

@@ -1,6 +1,6 @@
 package com.hazelcast.spark.connector;
 
-import com.hazelcast.spark.connector.HazelcastRDDFunctions;
+import com.hazelcast.spark.connector.rdd.HazelcastRDDFunctions;
 import org.apache.spark.api.java.JavaPairRDD;
 
 /**
