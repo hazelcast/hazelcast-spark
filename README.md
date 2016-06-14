@@ -1,4 +1,4 @@
-# Spark Connector for Hazelcast
+# Spark Connector for Hazelcast (BETA)
 Spark Connector for Hazelcast allows your Spark applications to connect Hazelcast cluster with the Spark RDD API.
 
 ## Features
@@ -6,6 +6,8 @@ Spark Connector for Hazelcast allows your Spark applications to connect Hazelcas
 - Read/Write support for Hazelcast Caches
 
 ## Configuration
+
+Spark Connector uses Hazelcast Client to talk with Hazelcast Cluster. You can provide configuration details of the client to be able to connect Hazelcast Cluster. If you have a complex setup, you can also provide a fully configured Hazelcast Client configuration XML to configure the Hazelcast Client.
 
 ### Properties
 You can set the options below for the `SparkConf` object:
@@ -114,4 +116,4 @@ javaPairRddFunctions(rdd).saveToHazelcastCache(name);
 
 # Known Limitations
 
-The data loaded from hazelcast maps and caches should be static, in other words, it shouldn't be mutated while being read by Apache Spark. Failing to do could end up missing or duplicate entries in the RDD.  
+If Hazelcast's data structure is modified (keys inserted or deleted) while Apache Spark is iterating over it, the RDD may encounter the same entry several times and fail to encounter other entries, even if they were present at the time of construction and untouched during iteration. It is therefore recommended to keep the dataset stable while being read by Spark.
