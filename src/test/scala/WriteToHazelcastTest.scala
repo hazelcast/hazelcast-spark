@@ -1,4 +1,5 @@
 import com.hazelcast.cache.impl.CacheProxy
+import com.hazelcast.client.HazelcastClientManager
 import com.hazelcast.config.Config
 import com.hazelcast.core.HazelcastInstance
 import com.hazelcast.instance.HazelcastInstanceFactory
@@ -36,10 +37,10 @@ class WriteToHazelcastTest(toCache: Boolean) extends HazelcastTestSupport {
   def after(): Unit = {
     System.clearProperty("hazelcast.test.use.network")
     System.clearProperty("hazelcast.local.localAddress")
-    hazelcastInstance.getLifecycleService.shutdown();
-    while (HazelcastInstanceFactory.getAllHazelcastInstances.size() > 0) {
-      sleepMillis(500)
+    while (HazelcastClientManager.getAllHazelcastClients.size > 0) {
+      sleepMillis(50)
     }
+    hazelcastInstance.getLifecycleService.terminate()
     sparkContext.stop()
   }
 

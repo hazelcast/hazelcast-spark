@@ -1,7 +1,7 @@
 import com.hazelcast.cache.impl.CacheProxy;
+import com.hazelcast.client.HazelcastClientManager;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.instance.HazelcastInstanceFactory;
 import com.hazelcast.map.impl.proxy.MapProxyImpl;
 import com.hazelcast.spark.connector.util.HazelcastUtil;
 import com.hazelcast.test.HazelcastTestSupport;
@@ -53,10 +53,10 @@ public class WriteToHazelcastJavaTest extends HazelcastTestSupport {
 
     @After
     public void tearDown() throws Exception {
-        server.getLifecycleService().terminate();
-        while (HazelcastInstanceFactory.getAllHazelcastInstances().size() > 0) {
+        while (HazelcastClientManager.getAllHazelcastClients().size() > 0) {
             sleepMillis(50);
         }
+        server.getLifecycleService().terminate();
         sparkContext.stop();
     }
 
