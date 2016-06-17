@@ -134,7 +134,7 @@ public class ReadFromHazelcastJavaTest extends HazelcastTestSupport {
     @Test
     public void flatMap() {
         HazelcastJavaRDD<Integer, Integer> hazelcastRDD = getPrepopulatedRDD();
-        List<Object> values = hazelcastRDD.flatMap(new FlatMapValues()).collect();
+        List<Integer> values = hazelcastRDD.flatMap(new FlatMapValues()).collect();
         assertEquals(100, values.size());
     }
 
@@ -156,9 +156,9 @@ public class ReadFromHazelcastJavaTest extends HazelcastTestSupport {
         }
     }
 
-    private static class FlatMapValues implements FlatMapFunction<Tuple2<Integer, Integer>, Object>, Serializable {
+    private static class FlatMapValues implements FlatMapFunction<Tuple2<Integer, Integer>, Integer>, Serializable {
         @Override
-        public Iterable<Object> call(Tuple2<Integer, Integer> integerIntegerTuple2) throws Exception {
+        public Iterable<Integer> call(Tuple2<Integer, Integer> integerIntegerTuple2) throws Exception {
             return Arrays.asList(integerIntegerTuple2._2());
         }
     }
