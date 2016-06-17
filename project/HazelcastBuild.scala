@@ -25,6 +25,8 @@ object HazelcastBuild extends Build {
       publishArtifact in Test := false,
       crossPaths := false,
       publishMavenStyle := true,
+      publishTo := Some("Cloudbees Snapshot Repository" at "https://repository-hazelcast-l337.forge.cloudbees.com/snapshot/"),
+      credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
       ivyXML := <dependencies>
         <dependency org="com.hazelcast" name="hazelcast" rev={hazelcastVersion} conf="compile->default(compile);provided->default(compile);test->default(compile)">
           <artifact name="hazelcast" type="jar" ext="jar" conf="compile"/>
