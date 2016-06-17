@@ -17,6 +17,7 @@ object HazelcastUtil {
     val map: IMap[K, V] = instance.getMap(name)
     map.asInstanceOf[ClientMapProxy[K, V]]
   }
+
   def getServerMapProxy[K, V](name: String, instance: HazelcastInstance): MapProxyImpl[K, V] = {
     val map: IMap[K, V] = instance.getMap(name)
     map.asInstanceOf[MapProxyImpl[K, V]]

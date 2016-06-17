@@ -1,6 +1,6 @@
 package com.hazelcast.spark.connector.util
 
-import ConnectionUtil.closeAll
+import com.hazelcast.spark.connector.util.ConnectionUtil.closeAll
 import org.apache.spark.SparkContext
 import org.apache.spark.scheduler.{SparkListener, SparkListenerJobEnd, SparkListenerJobStart}
 

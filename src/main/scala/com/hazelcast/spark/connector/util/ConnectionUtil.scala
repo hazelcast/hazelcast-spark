@@ -29,7 +29,7 @@ object ConnectionUtil {
       val maybeInstance: Option[HazelcastInstance] = instances.get(member)
       if (maybeInstance.isDefined) {
         val instance: HazelcastInstance = maybeInstance.get
-        if(instance.getLifecycleService.isRunning){
+        if (instance.getLifecycleService.isRunning) {
           instance.getLifecycleService.shutdown()
         }
         instances.remove(member)
