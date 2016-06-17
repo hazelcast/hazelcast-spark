@@ -5,6 +5,11 @@ Spark Connector for Hazelcast allows your Spark applications to connect Hazelcas
 - Read/Write support for Hazelcast Maps
 - Read/Write support for Hazelcast Caches
 
+## Requirements
+
+- Hazelcast 3.7.x
+- Apache Spark 1.6.1
+
 ## Configuration
 
 Spark Connector uses Hazelcast Client to talk with Hazelcast Cluster. You can provide configuration details of the client to be able to connect Hazelcast Cluster. If you have a complex setup, you can also provide a fully configured Hazelcast Client configuration XML to configure the Hazelcast Client.
@@ -113,6 +118,10 @@ javaPairRddFunctions(rdd).saveToHazelcastMap(name);
 javaPairRddFunctions(rdd).saveToHazelcastCache(name);
 
 ```
+
+## Testing
+
+Run `sbt test` command to execute the test suite.
 
 # Known Limitations
 
