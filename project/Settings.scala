@@ -1,7 +1,6 @@
+import sbt.Keys._
 import sbt._
-import Keys._
 import sbtassembly.AssemblyKeys._
-import sbtassembly._
 
 object Settings {
   val buildName = "hazelcast-spark"
@@ -16,6 +15,7 @@ object Settings {
     scalaVersion := buildScalaVersion,
     shellPrompt := ShellPrompt.buildShellPrompt,
     resolvers += Resolver.mavenLocal,
+    resolvers += "hazelcast cloudbees" at "https://repository-hazelcast-l337.forge.cloudbees.com/snapshot/",
     parallelExecution in Test := false,
     test in assembly := {}
   )

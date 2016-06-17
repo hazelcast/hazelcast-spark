@@ -1,9 +1,6 @@
 import sbt.Keys._
 import sbt._
 
-import scala.xml.{Node => XmlNode, NodeSeq => XmlNodeSeq}
-
-
 object HazelcastBuild extends Build {
 
   import Dependencies._
