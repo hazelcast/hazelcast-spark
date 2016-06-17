@@ -15,7 +15,7 @@ object Settings {
     scalaVersion := buildScalaVersion,
     shellPrompt := ShellPrompt.buildShellPrompt,
     resolvers += Resolver.mavenLocal,
-    resolvers += "hazelcast cloudbees" at "https://repository-hazelcast-l337.forge.cloudbees.com/snapshot/",
+    resolvers += "sonatype snapshot repository" at "https://oss.sonatype.org/content/repositories/snapshots",
     parallelExecution in Test := false,
     test in assembly := {}
   )
