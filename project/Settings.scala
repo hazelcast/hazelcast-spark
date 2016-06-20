@@ -14,8 +14,8 @@ object Settings {
     version := buildVersion,
     scalaVersion := buildScalaVersion,
     shellPrompt := ShellPrompt.buildShellPrompt,
+    resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
     resolvers += Resolver.mavenLocal,
-    resolvers += "sonatype snapshot repository" at "https://oss.sonatype.org/content/repositories/snapshots",
     parallelExecution in Test := false,
     test in assembly := {}
   )
