@@ -24,8 +24,14 @@ object HazelcastBuild extends Build {
       publishArtifact in Test := false,
       crossPaths := false,
       publishMavenStyle := true,
-      publishTo := Some("Cloudbees Snapshot Repository" at "https://repository-hazelcast-l337.forge.cloudbees.com/snapshot/"),
-      credentials += Credentials(file(sys.env.getOrElse("deployCredentials", Properties.userHome + ".ivy2/.credentials"))),
+      publishTo := {
+        val nexus = "https://oss.sonatype.org/"
+        if (isSnapshot.value)
+          Some("snapshots" at nexus + "content/repositories/snapshots")
+        else
+          Some("releases" at nexus + "service/local/staging/deploy/maven2")
+      },
+      credentials += Credentials(file(sys.env.getOrElse("deployCredentials", Properties.userHome + "/.ivy2/.credentials"))),
       ivyXML := <dependencies>
         <dependency org="com.hazelcast" name="hazelcast" rev={hazelcastVersion} conf="compile->default(compile);provided->default(compile);test->default(compile)">
           <artifact name="hazelcast" type="jar" ext="jar" conf="compile"/>
