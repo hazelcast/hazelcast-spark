@@ -119,6 +119,11 @@ javaPairRddFunctions(rdd).saveToHazelcastCache(name);
 
 ```
 
+## Code Samples
+
+You can find the code samples for Hazelcast Spark Connector at https://github.com/hazelcast/hazelcast-code-samples/tree/master/hazelcast-integration/spark
+
+
 ## Testing
 
 Run `sbt test` command to execute the test suite.
