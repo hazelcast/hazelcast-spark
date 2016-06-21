@@ -10,6 +10,58 @@ Spark Connector for Hazelcast allows your Spark applications to connect Hazelcas
 - Hazelcast 3.7.x
 - Apache Spark 1.6.1
 
+## Releases
+
+You can find the SBT and Maven dependencies for Spark Connector below.
+
+### Stable
+
+**SBT :**
+
+```scala
+libraryDependencies += "com.hazelcast" % "hazelcast-spark" % "0.1-SNAPSHOT"
+```
+
+
+**Maven :**
+
+```xml
+<dependency>
+    <groupId>com.hazelcast</groupId>
+    <artifactId>hazelcast-spark</artifactId>
+    <version>0.1-SNAPSHOT</version>
+</dependency>
+```
+
+### Snapshots
+
+**SBT :**
+
+Add Sonatype resolver to the SBT
+
+```scala
+resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+```
+
+**Maven:**
+
+Add Sonatype repository to the pom.xml
+
+```xml
+<repository>
+   <id>sonatype-snapshots</id>
+   <name>Sonatype Snapshot Repository</name>
+   <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+   <releases>
+       <enabled>false</enabled>
+   </releases>
+   <snapshots>
+       <enabled>true</enabled>
+   </snapshots>
+</repository>
+```
+
+
 ## Configuration
 
 Spark Connector uses Hazelcast Client to talk with Hazelcast Cluster. You can provide configuration details of the client to be able to connect Hazelcast Cluster. If you have a complex setup, you can also provide a fully configured Hazelcast Client configuration XML to configure the Hazelcast Client.
