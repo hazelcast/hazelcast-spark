@@ -2,8 +2,6 @@ import sbt.Keys._
 import sbt._
 import sbtassembly.AssemblyKeys._
 
-import scala.reflect.io.Path.string2path
-
 object Settings {
   val buildName = "hazelcast-spark"
   val buildVersion = "0.1-SNAPSHOT"
@@ -20,13 +18,14 @@ object Settings {
     resolvers += Resolver.mavenLocal,
     parallelExecution in Test := false,
     test in assembly := {},
-    pomExtra := <licenses>
-      <license>
-        <name>The Apache Software License, Version 2.0</name>
-        <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        <distribution>repo</distribution>
-      </license>
-    </licenses>
+    pomExtra := <url>https://github.com/hazelcast/hazelcast-spark/</url>
+      <licenses>
+        <license>
+          <name>The Apache Software License, Version 2.0</name>
+          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+          <distribution>repo</distribution>
+        </license>
+      </licenses>
       <scm>
         <connection>scm:git:git://github.com/hazelcast/hazelcast-spark.git</connection>
         <developerConnection>scm:git:git@github.com:hazelcast/hazelcast-spark.git</developerConnection>
