@@ -12,14 +12,22 @@ object ConnectionUtil {
   private[connector] val instances = mutable.Map[String, HazelcastInstance]()
 
   def getHazelcastConnection(member: String, conf: SerializableConf): HazelcastInstance = {
+    def createClientInstance: HazelcastInstance = {
+      val client: HazelcastInstance = HazelcastClient.newHazelcastClient(createClientConfig(conf, member))
+      instances.put(member, client)
+      client
+    }
     this.synchronized {
       val maybeInstance: Option[HazelcastInstance] = instances.get(member)
       if (maybeInstance.isEmpty) {
-        val client: HazelcastInstance = HazelcastClient.newHazelcastClient(createClientConfig(conf, member))
-        instances.put(member, client)
-        client
+        createClientInstance
       } else {
-        maybeInstance.get
+        val instance: HazelcastInstance = maybeInstance.get
+        if (instance.getLifecycleService.isRunning) {
+          instance
+        } else {
+          createClientInstance
+        }
       }
     }
   }

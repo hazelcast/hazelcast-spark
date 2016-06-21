@@ -9,6 +9,7 @@ import com.hazelcast.spark.connector.util.HazelcastUtil;
 import com.hazelcast.test.HazelcastTestSupport;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -159,7 +160,7 @@ public class ReadFromHazelcastJavaTest extends HazelcastTestSupport {
     private static class FlatMapValues implements FlatMapFunction<Tuple2<Integer, Integer>, Integer>, Serializable {
         @Override
         public Iterable<Integer> call(Tuple2<Integer, Integer> integerIntegerTuple2) throws Exception {
-            return Arrays.asList(integerIntegerTuple2._2());
+            return Collections.singletonList(integerIntegerTuple2._2());
         }
     }
 
