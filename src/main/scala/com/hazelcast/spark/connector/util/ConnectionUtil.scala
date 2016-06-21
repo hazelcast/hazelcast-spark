@@ -47,7 +47,7 @@ object ConnectionUtil {
 
   def closeAll(): Unit = {
     this.synchronized {
-      instances.values.foreach(instance => instance.getLifecycleService.shutdown())
+      instances.values.foreach(instance => if (instance.getLifecycleService.isRunning) instance.getLifecycleService.shutdown() else {})
       instances.clear()
     }
   }
