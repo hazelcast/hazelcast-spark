@@ -4,7 +4,7 @@ import sbtassembly.AssemblyKeys._
 
 object Settings {
   val buildName = "hazelcast-spark"
-  val buildVersion = "0.1-EA"
+  val buildVersion = "0.1-SNAPSHOT"
   val buildScalaVersion = "2.10.5"
 
   val buildSettings = Defaults.coreDefaultSettings ++ Seq(
