@@ -2,16 +2,18 @@ import sbt.Keys._
 import sbt._
 import sbtassembly.AssemblyKeys._
 
+import scala.reflect.io.Path.string2path
+
 object Settings {
   val buildName = "hazelcast-spark"
-  val buildOrganization = "com.hazelcast"
   val buildVersion = "0.1-SNAPSHOT"
   val buildScalaVersion = "2.10.5"
 
   val buildSettings = Defaults.coreDefaultSettings ++ Seq(
     name := buildName,
-    organization := buildOrganization,
     version := buildVersion,
+    organizationName := "Hazelcast, Inc.",
+    organizationHomepage := Some(new URL("http://www.hazelcast.com/")),
     scalaVersion := buildScalaVersion,
     shellPrompt := ShellPrompt.buildShellPrompt,
     resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
@@ -41,10 +43,6 @@ object Settings {
         <system>Github</system>
         <url>https://github.com/hazelcast/hazelcast-spark/issues</url>
       </issueManagement>
-      <organization>
-        <name>Hazelcast, Inc.</name>
-        <url>http://www.hazelcast.com/</url>
-      </organization>
   )
 
 }
