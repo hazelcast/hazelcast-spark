@@ -10,6 +10,7 @@ object Settings {
   val buildSettings = Defaults.coreDefaultSettings ++ Seq(
     name := buildName,
     version := buildVersion,
+    organization := "com.hazelcast",
     organizationName := "Hazelcast, Inc.",
     organizationHomepage := Some(new URL("http://www.hazelcast.com/")),
     scalaVersion := buildScalaVersion,
