@@ -1,5 +1,6 @@
 package com.hazelcast.spark.connector.rdd
 
+import com.hazelcast.client.HazelcastClientNotActiveException
 import com.hazelcast.client.cache.impl.ClientCacheProxy
 import com.hazelcast.client.proxy.ClientMapProxy
 import com.hazelcast.core.{HazelcastInstance, Partition => HazelcastPartition}
@@ -12,6 +13,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.{Partition, SparkContext, TaskContext}
 
 import scala.collection.JavaConversions._
+import scala.util.Try
 
 
 class HazelcastRDD[K, V](@transient val sc: SparkContext, val hzName: String,
@@ -29,6 +31,12 @@ class HazelcastRDD[K, V](@transient val sc: SparkContext, val hzName: String,
 
   @DeveloperApi
   override def compute(split: Partition, context: TaskContext): Iterator[(K, V)] = {
+    Try(computeInternal(split)).recover[Iterator[(K, V)]]({
+      case e: HazelcastClientNotActiveException ⇒ computeInternal(split)
+    }).get
+  }
+
+  def computeInternal(split: Partition): Iterator[(K, V)] = {
     val partitionLocationInfo = split.asInstanceOf[PartitionLocationInfo]
     val client: HazelcastInstance = getHazelcastConnection(partitionLocationInfo.location, config)
     if (isCache) {
@@ -39,7 +47,6 @@ class HazelcastRDD[K, V](@transient val sc: SparkContext, val hzName: String,
       new MapIterator[K, V](map.iterator(config.readBatchSize, split.index, config.valueBatchingEnabled))
     }
   }
-
 
   override protected def getPartitions: Array[Partition] = {
     var array: Array[Partition] = Array[Partition]()

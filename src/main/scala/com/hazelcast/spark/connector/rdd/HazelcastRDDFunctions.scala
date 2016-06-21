@@ -1,5 +1,6 @@
 package com.hazelcast.spark.connector.rdd
 
+import com.hazelcast.client.HazelcastClientNotActiveException
 import com.hazelcast.client.cache.impl.ClientCacheProxy
 import com.hazelcast.client.proxy.ClientMapProxy
 import com.hazelcast.core.HazelcastInstance
@@ -11,6 +12,7 @@ import org.apache.spark.TaskContext
 import org.apache.spark.rdd.RDD
 
 import scala.collection.JavaConversions._
+import scala.util.Try
 
 class HazelcastRDDFunctions[K, V](val rdd: RDD[(K, V)]) extends Serializable {
   val conf: SerializableConf = new SerializableConf(rdd.context)
@@ -34,6 +36,12 @@ class HazelcastRDDFunctions[K, V](val rdd: RDD[(K, V)]) extends Serializable {
 
   private class HazelcastWriteToCacheJob extends Serializable {
     def runJob(ctx: TaskContext, iterator: Iterator[(K, V)], cacheName: String): Unit = {
+      Try(writeInternal(iterator, cacheName)).recover({
+        case e: HazelcastClientNotActiveException ⇒ writeInternal(iterator, cacheName)
+      })
+    }
+
+    def writeInternal(iterator: Iterator[(K, V)], cacheName: String): Unit = {
       val client: HazelcastInstance = getHazelcastConnection(conf.serverAddresses, conf)
       val cache: ClientCacheProxy[K, V] = getClientCacheProxy(cacheName, client)
       iterator.grouped(conf.writeBatchSize).foreach((kv) => cache.putAll(mapAsJavaMap(kv.toMap)))
@@ -42,6 +50,12 @@ class HazelcastRDDFunctions[K, V](val rdd: RDD[(K, V)]) extends Serializable {
 
   private class HazelcastWriteToMapJob extends Serializable {
     def runJob(ctx: TaskContext, iterator: Iterator[(K, V)], mapName: String): Unit = {
+      Try(writeInternal(iterator, mapName)).recover({
+        case e: HazelcastClientNotActiveException ⇒ writeInternal(iterator, mapName)
+      })
+    }
+
+    def writeInternal(iterator: Iterator[(K, V)], mapName: String): Unit = {
       val client: HazelcastInstance = getHazelcastConnection(conf.serverAddresses, conf)
       val map: ClientMapProxy[K, V] = getClientMapProxy(mapName, client)
       iterator.grouped(conf.writeBatchSize).foreach((kv) => map.putAll(mapAsJavaMap(kv.toMap)))
