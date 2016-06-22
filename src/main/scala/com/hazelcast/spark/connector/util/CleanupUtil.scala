@@ -6,7 +6,7 @@ import org.apache.spark.scheduler.{SparkListener, SparkListenerJobEnd, SparkList
 
 object CleanupUtil {
 
-  val jobIds: collection.mutable.Set[Int] = collection.mutable.Set[Int]()
+  val jobIds: collection.mutable.Map[Int, Seq[Int]] = collection.mutable.Map[Int, Seq[Int]]()
   val cleanupJobRddName: String = "HazelcastResourceCleanupJob"
 
   def addCleanupListener(sc: SparkContext): Unit = {
@@ -16,7 +16,13 @@ object CleanupUtil {
           jobStart.stageInfos.foreach(info => {
             info.rddInfos.foreach(rdd => {
               if (!cleanupJobRddName.equals(rdd.name)) {
-                jobIds += jobStart.jobId
+                val ids: Seq[Int] = info.rddInfos.map(_.id)
+                val maybeIds: Option[Seq[Int]] = jobIds.get(jobStart.jobId)
+                if (maybeIds.isDefined) {
+                  jobIds.put(jobStart.jobId, ids ++ maybeIds.get)
+                } else {
+                  jobIds.put(jobStart.jobId, ids)
+                }
               }
             })
           })
@@ -28,7 +34,7 @@ object CleanupUtil {
           if (jobIds.contains(jobEnd.jobId)) {
             try {
               val workers = sc.getConf.getInt("spark.executor.instances", sc.getExecutorStorageStatus.length)
-              sc.parallelize(1 to workers, workers).setName(cleanupJobRddName).foreachPartition(it ⇒ closeAll())
+              sc.parallelize(1 to workers, workers).setName(cleanupJobRddName).foreachPartition(it ⇒ closeAll(jobIds.get(jobEnd.jobId).get))
               jobIds -= jobEnd.jobId
             } catch {
               case e: Exception =>

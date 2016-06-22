@@ -42,7 +42,7 @@ class HazelcastRDDFunctions[K, V](val rdd: RDD[(K, V)]) extends Serializable {
     }
 
     def writeInternal(iterator: Iterator[(K, V)], cacheName: String): Unit = {
-      val client: HazelcastInstance = getHazelcastConnection(conf.serverAddresses, conf)
+      val client: HazelcastInstance = getHazelcastConnection(conf.serverAddresses, rdd.id, conf)
       val cache: ClientCacheProxy[K, V] = getClientCacheProxy(cacheName, client)
       iterator.grouped(conf.writeBatchSize).foreach((kv) => cache.putAll(mapAsJavaMap(kv.toMap)))
     }
@@ -56,7 +56,7 @@ class HazelcastRDDFunctions[K, V](val rdd: RDD[(K, V)]) extends Serializable {
     }
 
     def writeInternal(iterator: Iterator[(K, V)], mapName: String): Unit = {
-      val client: HazelcastInstance = getHazelcastConnection(conf.serverAddresses, conf)
+      val client: HazelcastInstance = getHazelcastConnection(conf.serverAddresses, rdd.id, conf)
       val map: ClientMapProxy[K, V] = getClientMapProxy(mapName, client)
       iterator.grouped(conf.writeBatchSize).foreach((kv) => map.putAll(mapAsJavaMap(kv.toMap)))
     }
