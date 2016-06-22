@@ -20,12 +20,12 @@ class HazelcastRDD[K, V](@transient val sc: SparkContext, val hzName: String,
                          val isCache: Boolean, val config: SerializableConf) extends RDD[(K, V)](sc, Seq.empty) {
 
   @transient lazy val hazelcastPartitions: scala.collection.mutable.Map[Int, String] = {
-    val client: HazelcastInstance = getHazelcastConnection(config.serverAddresses, config)
+    val client: HazelcastInstance = getHazelcastConnection(config.serverAddresses, id, config)
     val partitions: scala.collection.mutable.Map[Int, String] = scala.collection.mutable.Map[Int, String]()
     client.getPartitionService.getPartitions.foreach { p =>
       partitions.put(p.getPartitionId, p.getOwner.getAddress.getHost + ":" + p.getOwner.getAddress.getPort)
     }
-    closeHazelcastConnection(config.serverAddresses)
+    closeHazelcastConnection(config.serverAddresses, id)
     partitions
   }
 
@@ -38,7 +38,7 @@ class HazelcastRDD[K, V](@transient val sc: SparkContext, val hzName: String,
 
   def computeInternal(split: Partition): Iterator[(K, V)] = {
     val partitionLocationInfo = split.asInstanceOf[PartitionLocationInfo]
-    val client: HazelcastInstance = getHazelcastConnection(partitionLocationInfo.location, config)
+    val client: HazelcastInstance = getHazelcastConnection(partitionLocationInfo.location, id, config)
     if (isCache) {
       val cache: ClientCacheProxy[K, V] = getClientCacheProxy(hzName, client)
       new CacheIterator[K, V](cache.iterator(config.readBatchSize, split.index, config.valueBatchingEnabled))

@@ -48,9 +48,6 @@ class ReadFromHazelcastTest(fromCache: Boolean) extends HazelcastTestSupport {
     val hazelcastRDD: HazelcastRDD[Int, Int] = getPrepopulatedRDD()
     val tuples: Array[(Int, Int)] = hazelcastRDD.collect()
 
-    tuples.foreach {
-      println
-    }
     assertEquals("Count should be ", 100, tuples.length)
   }
 

@@ -11,14 +11,14 @@ object ConnectionUtil {
 
   private[connector] val instances = mutable.Map[String, HazelcastInstance]()
 
-  def getHazelcastConnection(member: String, conf: SerializableConf): HazelcastInstance = {
+  def getHazelcastConnection(member: String, rddId: Int, conf: SerializableConf): HazelcastInstance = {
     def createClientInstance: HazelcastInstance = {
       val client: HazelcastInstance = HazelcastClient.newHazelcastClient(createClientConfig(conf, member))
-      instances.put(member, client)
+      instances.put(member + "#" + rddId, client)
       client
     }
     this.synchronized {
-      val maybeInstance: Option[HazelcastInstance] = instances.get(member)
+      val maybeInstance: Option[HazelcastInstance] = instances.get(member + "#" + rddId)
       if (maybeInstance.isEmpty) {
         createClientInstance
       } else {
@@ -32,23 +32,33 @@ object ConnectionUtil {
     }
   }
 
-  def closeHazelcastConnection(member: String): Unit = {
+  def closeHazelcastConnection(member: String, rddId: Int): Unit = {
     this.synchronized {
-      val maybeInstance: Option[HazelcastInstance] = instances.get(member)
+      val maybeInstance: Option[HazelcastInstance] = instances.get(member + "#" + rddId)
       if (maybeInstance.isDefined) {
         val instance: HazelcastInstance = maybeInstance.get
         if (instance.getLifecycleService.isRunning) {
           instance.getLifecycleService.shutdown()
         }
-        instances.remove(member)
+        instances.remove(member + "#" + rddId)
       }
     }
   }
 
-  def closeAll(): Unit = {
+  def closeAll(rddIds: Seq[Int]): Unit = {
     this.synchronized {
-      instances.values.foreach(instance => if (instance.getLifecycleService.isRunning) instance.getLifecycleService.shutdown() else {})
-      instances.clear()
+      instances.keys.foreach({
+        key => {
+          val instanceRddId: String = key.split("#")(1)
+          if (rddIds.contains(instanceRddId.toInt)) {
+            val instance: HazelcastInstance = instances.get(key).get
+            if (instance.getLifecycleService.isRunning) {
+              instance.shutdown();
+            }
+            instances.remove(key);
+          }
+        }
+      })
     }
   }
 
