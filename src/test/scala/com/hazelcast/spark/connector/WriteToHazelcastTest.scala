@@ -1,9 +1,10 @@
+package com.hazelcast.spark.connector
+
 import com.hazelcast.cache.impl.CacheProxy
 import com.hazelcast.client.HazelcastClientManager
 import com.hazelcast.config.Config
 import com.hazelcast.core.HazelcastInstance
 import com.hazelcast.map.impl.proxy.MapProxyImpl
-import com.hazelcast.spark.connector.toHazelcastRDDFunctions
 import com.hazelcast.spark.connector.util.HazelcastUtil
 import com.hazelcast.test.HazelcastTestSupport
 import com.hazelcast.test.HazelcastTestSupport._
