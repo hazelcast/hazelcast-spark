@@ -8,14 +8,12 @@ import com.hazelcast.test.HazelcastTestSupport
 import com.hazelcast.test.HazelcastTestSupport._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
-import org.junit.{After, Before, Test}
+import org.junit.{After, Before, Ignore, Test}
 
 import scala.collection.{JavaConversions, Map}
 
-@RunWith(value = classOf[Parameterized])
-class WritePerformanceTest(sparkWriteBatchSize: Int) extends HazelcastTestSupport {
+@Ignore // since this requires local tachyon installation
+class WritePerformanceTest() extends HazelcastTestSupport {
 
   var sparkContext: SparkContext = null
   var hazelcastInstance: HazelcastInstance = null
@@ -108,7 +106,6 @@ class WritePerformanceTest(sparkWriteBatchSize: Int) extends HazelcastTestSuppor
       .set("spark.driver.host", "127.0.0.1")
       .set("hazelcast.server.addresses", "127.0.0.1:5701")
       .set("hazelcast.server.groupName", groupName)
-      .set("hazelcast.spark.writeBatchSize", sparkWriteBatchSize.toString)
     new SparkContext(conf)
   }
 

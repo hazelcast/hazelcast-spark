@@ -1,7 +1,5 @@
 package com.hazelcast.spark.connector
 
-import java.io.BufferedWriter
-
 import com.hazelcast.client.config.ClientConfig
 import com.hazelcast.client.{HazelcastClient, HazelcastClientManager}
 import com.hazelcast.config.Config
@@ -15,12 +13,13 @@ import org.junit.{After, Before, Ignore, Test}
 
 import scala.collection.JavaConversions
 
+@Ignore // since this requires local tachyon installation
 class ReadPerformanceTest extends HazelcastTestSupport {
 
   var sparkContext: SparkContext = null
   var hazelcastInstance: HazelcastInstance = null
   val groupName: String = randomName()
-  val ITEM_COUNT: Int = 1000000
+  val ITEM_COUNT: Int = 5000000
 
 
   @Before
@@ -44,7 +43,7 @@ class ReadPerformanceTest extends HazelcastTestSupport {
   @Test
   def readFromSpark(): Unit = {
     val rdd: RDD[(Int, Long)] = sparkContext.parallelize(1 to ITEM_COUNT).zipWithIndex()
-    rdd.persist()
+    rdd.persist(org.apache.spark.storage.StorageLevel.MEMORY_ONLY)
     rdd.count()
 
     val startSpark = System.currentTimeMillis
@@ -52,10 +51,10 @@ class ReadPerformanceTest extends HazelcastTestSupport {
     val endSpark = System.currentTimeMillis
     val tookSpark = endSpark - startSpark
 
-//    val writer: BufferedWriter = scala.tools.nsc.io.File("/Users/emindemirci/Desktop/sparkResults").bufferedWriter(true)
-//    writer.append(tookSpark.toString)
-//    writer.newLine()
-//    writer.close()
+    //    val writer: BufferedWriter = scala.tools.nsc.io.File("/Users/emindemirci/Desktop/sparkResults").bufferedWriter(true)
+    //    writer.append(tookSpark.toString)
+    //    writer.newLine()
+    //    writer.close()
 
     println("read via spark took : " + tookSpark)
     stopSpark
@@ -78,17 +77,16 @@ class ReadPerformanceTest extends HazelcastTestSupport {
     val endHz = System.currentTimeMillis
     val tookHz = endHz - startHz
 
-//    val writer: BufferedWriter = scala.tools.nsc.io.File("/Users/emindemirci/Desktop/hazelcastResults").bufferedWriter(true)
-//    writer.append(tookHz.toString)
-//    writer.newLine()
-//    writer.close()
+    //    val writer: BufferedWriter = scala.tools.nsc.io.File("/Users/emindemirci/Desktop/hazelcastResults").bufferedWriter(true)
+    //    writer.append(tookHz.toString)
+    //    writer.newLine()
+    //    writer.close()
 
     println("read via hazelcast took : " + tookHz)
     stopSpark
   }
 
   @Test
-  @Ignore // since this requires local tachyon installation
   def readFromTachyon(): Unit = {
     val rdd: RDD[(Int, Long)] = sparkContext.parallelize(1 to ITEM_COUNT).zipWithIndex()
     rdd.persist(org.apache.spark.storage.StorageLevel.OFF_HEAP)
@@ -99,10 +97,10 @@ class ReadPerformanceTest extends HazelcastTestSupport {
     val endSpark = System.currentTimeMillis
     val tookSpark = endSpark - startSpark
 
-//    val writer: BufferedWriter = scala.tools.nsc.io.File("/Users/emindemirci/Desktop/tachyonResults").bufferedWriter(true)
-//    writer.append(tookSpark.toString)
-//    writer.newLine()
-//    writer.close()
+    //    val writer: BufferedWriter = scala.tools.nsc.io.File("/Users/emindemirci/Desktop/tachyonResults").bufferedWriter(true)
+    //    writer.append(tookSpark.toString)
+    //    writer.newLine()
+    //    writer.close()
 
     println("read via tachyon took : " + tookSpark)
     stopSpark
@@ -117,7 +115,7 @@ class ReadPerformanceTest extends HazelcastTestSupport {
   }
 
   def getSparkContext: SparkContext = {
-    val conf: SparkConf = new SparkConf().setMaster("local[1]").setAppName(this.getClass.getName)
+    val conf: SparkConf = new SparkConf().setMaster("local[4]").setAppName(this.getClass.getName)
       .set("spark.driver.host", "127.0.0.1")
       .set("hazelcast.server.addresses", "127.0.0.1:5701")
       .set("hazelcast.server.groupName", groupName)
