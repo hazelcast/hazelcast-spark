@@ -1,6 +1,5 @@
 package com.hazelcast.spark.connector
 
-
 import com.hazelcast.client.config.ClientConfig
 import com.hazelcast.client.{HazelcastClient, HazelcastClientManager}
 import com.hazelcast.config.Config
@@ -16,7 +15,7 @@ import org.junit.{After, Before, Test}
 import scala.collection.{JavaConversions, Map}
 
 @RunWith(value = classOf[Parameterized])
-class WriteToHazelcastPerformanceTest(sparkWriteBatchSize: Int) extends HazelcastTestSupport {
+class WritePerformanceTest(sparkWriteBatchSize: Int) extends HazelcastTestSupport {
 
   var sparkContext: SparkContext = null
   var hazelcastInstance: HazelcastInstance = null
@@ -116,9 +115,5 @@ class WriteToHazelcastPerformanceTest(sparkWriteBatchSize: Int) extends Hazelcas
 
 }
 
-object WriteToHazelcastPerformanceTest {
-  @Parameterized.Parameters(name = "sparkWriteBatchSize = {0}") def parameters: java.lang.Iterable[Array[AnyRef]] = {
-    java.util.Arrays.asList(Array(Int.box(1000)), Array(Int.box(10000)), Array(Int.box(100000)), Array(Int.box(1000000)))
-  }
-}
+
 

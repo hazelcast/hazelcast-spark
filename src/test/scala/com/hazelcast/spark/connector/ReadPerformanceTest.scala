@@ -1,22 +1,21 @@
 package com.hazelcast.spark.connector
 
+import java.io.BufferedWriter
 
 import com.hazelcast.client.config.ClientConfig
 import com.hazelcast.client.{HazelcastClient, HazelcastClientManager}
 import com.hazelcast.config.Config
 import com.hazelcast.core.{HazelcastInstance, IMap}
+import com.hazelcast.spark.connector.rdd.HazelcastRDD
 import com.hazelcast.test.HazelcastTestSupport
 import com.hazelcast.test.HazelcastTestSupport._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
-import org.junit.{After, Before, Test}
+import org.junit.{After, Before, Ignore, Test}
 
-import scala.collection.{JavaConversions, Map}
+import scala.collection.JavaConversions
 
-@RunWith(value = classOf[Parameterized])
-class WriteToHazelcastPerformanceTest(sparkWriteBatchSize: Int) extends HazelcastTestSupport {
+class ReadPerformanceTest extends HazelcastTestSupport {
 
   var sparkContext: SparkContext = null
   var hazelcastInstance: HazelcastInstance = null
@@ -43,56 +42,69 @@ class WriteToHazelcastPerformanceTest(sparkWriteBatchSize: Int) extends Hazelcas
 
 
   @Test
-  def sparkWrite(): Unit = {
-    val name: String = randomName()
+  def readFromSpark(): Unit = {
     val rdd: RDD[(Int, Long)] = sparkContext.parallelize(1 to ITEM_COUNT).zipWithIndex()
-    val map: Map[Int, Long] = rdd.collectAsMap()
-    val javaMap: java.util.Map[Int, Long] = JavaConversions.mapAsJavaMap(map)
-
+    rdd.persist()
+    rdd.count()
 
     val startSpark = System.currentTimeMillis
-    rdd.saveToHazelcastMap(name)
+    rdd.take(ITEM_COUNT)
     val endSpark = System.currentTimeMillis
     val tookSpark = endSpark - startSpark
 
-    println("write via spark took : " + tookSpark)
+    val writer: BufferedWriter = scala.tools.nsc.io.File("/Users/emindemirci/Desktop/sparkResults").bufferedWriter(true)
+    writer.append(tookSpark.toString)
+    writer.newLine()
+    writer.close()
+
+    println("read via spark took : " + tookSpark)
     stopSpark
   }
 
-
   @Test
-  def hazelcastWrite(): Unit = {
+  def readFromHazelcast(): Unit = {
     val name: String = randomName()
     val map: java.util.Map[Int, Int] = JavaConversions.mapAsJavaMap((1 to ITEM_COUNT).zipWithIndex.toMap)
     val config: ClientConfig = new ClientConfig
     config.getGroupConfig.setName(groupName)
     val client: HazelcastInstance = HazelcastClient.newHazelcastClient(config)
-
     val hazelcastMap: IMap[Int, Int] = client.getMap(name)
-    val startHz = System.currentTimeMillis
     hazelcastMap.putAll(map)
+    client.getLifecycleService.shutdown()
+
+    val startHz = System.currentTimeMillis
+    val hazelcastRDD: HazelcastRDD[Nothing, Nothing] = sparkContext.fromHazelcastMap(name)
+    hazelcastRDD.take(ITEM_COUNT)
     val endHz = System.currentTimeMillis
     val tookHz = endHz - startHz
 
-    println("write via hazelcast took : " + tookHz)
-    client.getLifecycleService.shutdown()
+    val writer: BufferedWriter = scala.tools.nsc.io.File("/Users/emindemirci/Desktop/hazelcastResults").bufferedWriter(true)
+    writer.append(tookHz.toString)
+    writer.newLine()
+    writer.close()
+
+    println("read via hazelcast took : " + tookHz)
     stopSpark
   }
 
   @Test
-  def tachyonWrite(): Unit = {
-    val name: String = randomName()
+  @Ignore // since this requires local tachyon installation
+  def readFromTachyon(): Unit = {
     val rdd: RDD[(Int, Long)] = sparkContext.parallelize(1 to ITEM_COUNT).zipWithIndex()
-    val map: Map[Int, Long] = rdd.collectAsMap()
-    val javaMap: java.util.Map[Int, Long] = JavaConversions.mapAsJavaMap(map)
-
+    rdd.persist(org.apache.spark.storage.StorageLevel.OFF_HEAP)
+    rdd.count() // to actually persist to Tachyon
 
     val startSpark = System.currentTimeMillis
-    rdd.saveAsTextFile("tachyon://localhost:19998/result" + System.currentTimeMillis())
+    rdd.take(ITEM_COUNT)
     val endSpark = System.currentTimeMillis
     val tookSpark = endSpark - startSpark
 
-    println("write via tachyon took : " + tookSpark)
+    val writer: BufferedWriter = scala.tools.nsc.io.File("/Users/emindemirci/Desktop/tachyonResults").bufferedWriter(true)
+    writer.append(tookSpark.toString)
+    writer.newLine()
+    writer.close()
+
+    println("read via tachyon took : " + tookSpark)
     stopSpark
   }
 
@@ -109,16 +121,11 @@ class WriteToHazelcastPerformanceTest(sparkWriteBatchSize: Int) extends Hazelcas
       .set("spark.driver.host", "127.0.0.1")
       .set("hazelcast.server.addresses", "127.0.0.1:5701")
       .set("hazelcast.server.groupName", groupName)
-      .set("hazelcast.spark.writeBatchSize", sparkWriteBatchSize.toString)
     new SparkContext(conf)
   }
 
 
 }
 
-object WriteToHazelcastPerformanceTest {
-  @Parameterized.Parameters(name = "sparkWriteBatchSize = {0}") def parameters: java.lang.Iterable[Array[AnyRef]] = {
-    java.util.Arrays.asList(Array(Int.box(1000)), Array(Int.box(10000)), Array(Int.box(100000)), Array(Int.box(1000000)))
-  }
-}
+
 
