@@ -52,10 +52,10 @@ class ReadPerformanceTest extends HazelcastTestSupport {
     val endSpark = System.currentTimeMillis
     val tookSpark = endSpark - startSpark
 
-    val writer: BufferedWriter = scala.tools.nsc.io.File("/Users/emindemirci/Desktop/sparkResults").bufferedWriter(true)
-    writer.append(tookSpark.toString)
-    writer.newLine()
-    writer.close()
+//    val writer: BufferedWriter = scala.tools.nsc.io.File("/Users/emindemirci/Desktop/sparkResults").bufferedWriter(true)
+//    writer.append(tookSpark.toString)
+//    writer.newLine()
+//    writer.close()
 
     println("read via spark took : " + tookSpark)
     stopSpark
@@ -78,10 +78,10 @@ class ReadPerformanceTest extends HazelcastTestSupport {
     val endHz = System.currentTimeMillis
     val tookHz = endHz - startHz
 
-    val writer: BufferedWriter = scala.tools.nsc.io.File("/Users/emindemirci/Desktop/hazelcastResults").bufferedWriter(true)
-    writer.append(tookHz.toString)
-    writer.newLine()
-    writer.close()
+//    val writer: BufferedWriter = scala.tools.nsc.io.File("/Users/emindemirci/Desktop/hazelcastResults").bufferedWriter(true)
+//    writer.append(tookHz.toString)
+//    writer.newLine()
+//    writer.close()
 
     println("read via hazelcast took : " + tookHz)
     stopSpark
@@ -99,10 +99,10 @@ class ReadPerformanceTest extends HazelcastTestSupport {
     val endSpark = System.currentTimeMillis
     val tookSpark = endSpark - startSpark
 
-    val writer: BufferedWriter = scala.tools.nsc.io.File("/Users/emindemirci/Desktop/tachyonResults").bufferedWriter(true)
-    writer.append(tookSpark.toString)
-    writer.newLine()
-    writer.close()
+//    val writer: BufferedWriter = scala.tools.nsc.io.File("/Users/emindemirci/Desktop/tachyonResults").bufferedWriter(true)
+//    writer.append(tookSpark.toString)
+//    writer.newLine()
+//    writer.close()
 
     println("read via tachyon took : " + tookSpark)
     stopSpark
