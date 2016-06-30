@@ -34,7 +34,10 @@ object CleanupUtil {
           if (jobIds.contains(jobEnd.jobId)) {
             try {
               val workers = sc.getConf.getInt("spark.executor.instances", sc.getExecutorStorageStatus.length)
-              sc.parallelize(1 to workers, workers).setName(cleanupJobRddName).foreachPartition(it ⇒ closeAll(jobIds.get(jobEnd.jobId).get))
+              val rddId: Option[Seq[Int]] = jobIds.get(jobEnd.jobId)
+              if (rddId.isDefined) {
+                sc.parallelize(1 to workers, workers).setName(cleanupJobRddName).foreachPartition(it ⇒ closeAll(rddId.get))
+              }
               jobIds -= jobEnd.jobId
             } catch {
               case e: Exception =>
