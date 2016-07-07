@@ -23,13 +23,13 @@ public class HazelcastSparkContext {
         HazelcastRDD<K, V> hazelcastRDD = hazelcastSparkContextFunctions.fromHazelcastCache(cacheName);
         ClassTag<K> kt = HazelcastUtil.getClassTag();
         ClassTag<V> vt = HazelcastUtil.getClassTag();
-        return new HazelcastJavaRDD<K, V>(hazelcastRDD, kt, vt);
+        return new HazelcastJavaRDD<>(hazelcastRDD, kt, vt);
     }
 
     public <K, V> HazelcastJavaRDD<K, V> fromHazelcastMap(String mapName) {
         HazelcastRDD<K, V> hazelcastRDD = hazelcastSparkContextFunctions.fromHazelcastMap(mapName);
         ClassTag<K> kt = HazelcastUtil.getClassTag();
         ClassTag<V> vt = HazelcastUtil.getClassTag();
-        return new HazelcastJavaRDD<K, V>(hazelcastRDD, kt, vt);
+        return new HazelcastJavaRDD<>(hazelcastRDD, kt, vt);
     }
 }

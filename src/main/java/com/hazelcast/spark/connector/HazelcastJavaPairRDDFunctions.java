@@ -12,7 +12,7 @@ public final class HazelcastJavaPairRDDFunctions {
     }
 
     public static <K, V> HazelcastRDDFunctions javaPairRddFunctions(JavaPairRDD<K, V> rdd) {
-        return new HazelcastRDDFunctions<K, V>(rdd.rdd());
+        return new HazelcastRDDFunctions<>(rdd.rdd());
     }
 
 }
