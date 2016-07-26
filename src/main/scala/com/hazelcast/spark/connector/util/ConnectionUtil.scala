@@ -53,9 +53,9 @@ object ConnectionUtil {
           if (rddIds.contains(instanceRddId.toInt)) {
             val instance: HazelcastInstance = instances.get(key).get
             if (instance.getLifecycleService.isRunning) {
-              instance.shutdown();
+              instance.shutdown()
             }
-            instances.remove(key);
+            instances.remove(key)
           }
         }
       })
