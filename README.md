@@ -1,29 +1,49 @@
-# Spark Connector for Hazelcast (BETA)
-Spark Connector for Hazelcast allows your Spark applications to connect Hazelcast cluster with the Spark RDD API.
+# Table of Contents
 
-## Features
+* [Spark Connector for Hazelcast](#spark-connector-for-hazelcast-beta)
+* [Features](#features)
+* [Requirements](#requirements)
+* [Releases](#releases)
+  * [Stable](#stable)
+  * [Snapshots](#snapshots)
+* [Configuration](#configuration)
+  * [Properties](#properties)
+  * [Creating the SparkContext](#creating-the-sparkcontext)
+* [Reading Data from Hazelcast](#reading-data-from-hazelcast)
+* [Writing Data to Hazelcast](#writing-data-to-hazelcast)
+* [Code Samples](#code-samples)
+* [Testing](#testing)
+* [Known Limitations](#known-limitations)
+
+
+# Spark Connector for Hazelcast (BETA)
+
+Spark Connector for Hazelcast allows your Spark applications to connect to a Hazelcast cluster with the Spark RDD API.
+
+# Features
+
 - Read/Write support for Hazelcast Maps
 - Read/Write support for Hazelcast Caches
 
-## Requirements
+# Requirements
 
 - Hazelcast 3.7.x
 - Apache Spark 1.6.1
 
-## Releases
+# Releases
 
-You can find the SBT and Maven dependencies for Spark Connector below.
+SBT (Scala Build Tool) and Maven dependencies for Spark Connector's stable and snapshot releases are shown in the following sections.
 
-### Stable
+## Stable
 
-**SBT :**
+**SBT:**
 
 ```scala
 libraryDependencies += "com.hazelcast" % "hazelcast-spark" % "0.1-SNAPSHOT"
 ```
 
 
-**Maven :**
+**Maven:**
 
 ```xml
 <dependency>
@@ -33,11 +53,11 @@ libraryDependencies += "com.hazelcast" % "hazelcast-spark" % "0.1-SNAPSHOT"
 </dependency>
 ```
 
-### Snapshots
+## Snapshots
 
-**SBT :**
+**SBT:**
 
-Add Sonatype resolver to the SBT
+Add Sonatype resolver to the SBT as shown below:
 
 ```scala
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
@@ -45,7 +65,7 @@ resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repos
 
 **Maven:**
 
-Add Sonatype repository to the pom.xml
+Add Sonatype repository to your `pom.xml` as shown below:
 
 ```xml
 <repository>
@@ -62,26 +82,27 @@ Add Sonatype repository to the pom.xml
 ```
 
 
-## Configuration
+# Configuration
 
-Spark Connector uses Hazelcast Client to talk with Hazelcast Cluster. You can provide configuration details of the client to be able to connect Hazelcast Cluster. If you have a complex setup, you can also provide a fully configured Hazelcast Client configuration XML to configure the Hazelcast Client.
+Spark Connector uses Hazelcast Client to talk with a Hazelcast Cluster. You can provide the configuration details of the client to be able to connect to a Hazelcast Cluster. If you have a complex setup, you can also provide a fully configured Hazelcast Client configuration XML to configure the Hazelcast Client.
 
-### Properties
+## Properties
+
 You can set the options below for the `SparkConf` object:
 
 Property name                                  | Description                                       | Default value      
 -----------------------------------------------|---------------------------------------------------|--------------------
-hazelcast.server.addresses                     | Comma separated list of hazelcast server addresses  | 127.0.0.1:5701    
-hazelcast.server.groupName                    | Group name of the Hazelcast Cluster | dev    
-hazelcast.server.groupPass                    | Group password of the Hazelcast Cluster | dev-pass
-hazelcast.spark.valueBatchingEnabled           | If enabled, retrieves values from hazelcast in batches for better performance, if disabled, for each key, connector will make a retrieve call to the cluster for retrieving the most recent value. | true   
-hazelcast.spark.readBatchSize                  | Number of entries to read in for each batch | 1000    
-hazelcast.spark.writeBatchSize                 | Number of entries to write in for each batch | 1000    
+hazelcast.server.addresses                     | Comma separated list of Hazelcast server addresses.  | 127.0.0.1:5701    
+hazelcast.server.groupName                    | Group name of the Hazelcast Cluster. | dev    
+hazelcast.server.groupPass                    | Group password of the Hazelcast Cluster. | dev-pass
+hazelcast.spark.valueBatchingEnabled           | If enabled, retrieves values from Hazelcast in batches for better performance. If disabled, for each key, the connector will make a retrieve call to the cluster for retrieving the most recent value. | true   
+hazelcast.spark.readBatchSize                  | Number of entries to read in for each batch. | 1000    
+hazelcast.spark.writeBatchSize                 | Number of entries to write in for each batch. | 1000    
 hazelcast.spark.clientXmlPath                  | Location of the Hazelcast Client XML configuration file. | N/A    
 
-### Creating the SparkContext
+## Creating the SparkContext
 
-Scala :
+**Scala:**
 
 ```scala
 val conf = new SparkConf()
@@ -94,7 +115,9 @@ val conf = new SparkConf()
 
 val sc = new SparkContext("spark://127.0.0.1:7077", "appname", conf)
 ```
-Java :
+
+**Java:**
+
 ```java
 
 SparkConf conf = new SparkConf()
@@ -112,11 +135,12 @@ HazelcastSparkContext hsc = new HazelcastSparkContext(jsc);
 
 
 
-## Reading Data from Hazelcast
+# Reading Data from Hazelcast
 
-After SparkContext is created, we can load data stored in Hazelcast Maps and Caches into Spark as RDDs like below.
+After `SparkContext` is created, you can load data stored in Hazelcast Maps and Caches into Spark as RDDs as shown below:
 
-Scala :
+**Scala:**
+
 ```scala
 import com.hazelcast.spark.connector.{toSparkContextFunctions}
 
@@ -126,22 +150,23 @@ val rddFromMap = sc.fromHazelcastMap("map-name-to-be-loaded")
 // read from cache
 val rddFromCache = sc.fromHazelcastCache("cache-name-to-be-loaded")
 ```
-Java :
+
+**Java:**
+
 ```java
 // read from map
 HazelcastJavaRDD rddFromMap = hsc.fromHazelcastMap("map-name-to-be-loaded")
 
 // read from cache
 HazelcastJavaRDD rddFromCache = hsc.fromHazelcastCache("cache-name-to-be-loaded")
-
 ```
 
-## Writing Data to Hazelcast
+# Writing Data to Hazelcast
 
-After any computation you can save your `PairRDD`s to Hazelcast Cluster as Maps or Caches.
+After any computation, you can save your `PairRDD`s to Hazelcast Cluster as Maps or Caches as shown below:
 
 
-Scala :
+**Scala:**
 
 ```scala
 import com.hazelcast.spark.connector.{toHazelcastRDDFunctions}
@@ -153,7 +178,9 @@ rdd.saveToHazelcastMap(name);
 // write to cache
 rdd.saveToHazelcastCache(name);
 ```
-Java :
+
+**Java:**
+
 ```java
 import static com.hazelcast.spark.connector.HazelcastJavaPairRDDFunctions.javaPairRddFunctions;
 
@@ -168,18 +195,17 @@ javaPairRddFunctions(rdd).saveToHazelcastMap(name);
 
 // write to cache
 javaPairRddFunctions(rdd).saveToHazelcastCache(name);
-
 ```
 
-## Code Samples
+# Code Samples
 
-You can find the code samples for Hazelcast Spark Connector at https://github.com/hazelcast/hazelcast-code-samples/tree/master/hazelcast-integration/spark
+You can find the code samples for Hazelcast Spark Connector at https://github.com/hazelcast/hazelcast-code-samples/tree/master/hazelcast-integration/spark.
 
 
-## Testing
+# Testing
 
 Run `sbt test` command to execute the test suite.
 
 # Known Limitations
 
-If Hazelcast's data structure is modified (keys inserted or deleted) while Apache Spark is iterating over it, the RDD may encounter the same entry several times and fail to encounter other entries, even if they were present at the time of construction and untouched during iteration. It is therefore recommended to keep the dataset stable while being read by Spark.
+If Hazelcast's data structure is modified (keys inserted or deleted) while Apache Spark is iterating over it, the RDD may encounter the same entry several times and fail to encounter other entries, even if they were present at the time of construction and untouched during the iteration. It is therefore recommended to keep the dataset stable while being read by Spark.
