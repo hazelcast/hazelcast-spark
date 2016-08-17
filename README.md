@@ -19,7 +19,7 @@ You can find the SBT and Maven dependencies for Spark Connector below.
 **SBT :**
 
 ```scala
-libraryDependencies += "com.hazelcast" % "hazelcast-spark" % "0.1-SNAPSHOT"
+libraryDependencies += "com.hazelcast" % "hazelcast-spark" % "0.1"
 ```
 
 
@@ -29,7 +29,7 @@ libraryDependencies += "com.hazelcast" % "hazelcast-spark" % "0.1-SNAPSHOT"
 <dependency>
     <groupId>com.hazelcast</groupId>
     <artifactId>hazelcast-spark</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.1</version>
 </dependency>
 ```
 
