@@ -16,7 +16,7 @@
 * [Known Limitations](#known-limitations)
 
 
-# Spark Connector for Hazelcast (BETA)
+# Spark Connector for Hazelcast
 
 Spark Connector for Hazelcast allows your Spark applications to connect to a Hazelcast cluster with the Spark RDD API.
 
