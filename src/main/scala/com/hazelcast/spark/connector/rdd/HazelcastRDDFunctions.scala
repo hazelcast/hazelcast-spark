@@ -38,13 +38,16 @@ class HazelcastRDDFunctions[K, V](val rdd: RDD[(K, V)]) extends Serializable {
     def runJob(ctx: TaskContext, iterator: Iterator[(K, V)], cacheName: String): Unit = {
       Try(writeInternal(iterator, cacheName)).recover({
         case e: HazelcastClientNotActiveException ⇒ writeInternal(iterator, cacheName)
+        case e: Exception => throw e;
       })
     }
 
     def writeInternal(iterator: Iterator[(K, V)], cacheName: String): Unit = {
       val client: HazelcastInstance = getHazelcastConnection(conf.serverAddresses, rdd.id, conf)
       val cache: ClientCacheProxy[K, V] = getClientCacheProxy(cacheName, client)
-      iterator.grouped(conf.writeBatchSize).foreach((kv) => cache.putAll(mapAsJavaMap(kv.toMap)))
+      iterator.grouped(conf.writeBatchSize).foreach((kv) => Try(cache.putAll(mapAsJavaMap(kv.toMap))).recover({
+        case e: Exception => e.printStackTrace();
+      }))
     }
   }
 
@@ -52,13 +55,16 @@ class HazelcastRDDFunctions[K, V](val rdd: RDD[(K, V)]) extends Serializable {
     def runJob(ctx: TaskContext, iterator: Iterator[(K, V)], mapName: String): Unit = {
       Try(writeInternal(iterator, mapName)).recover({
         case e: HazelcastClientNotActiveException ⇒ writeInternal(iterator, mapName)
+        case e: Exception => throw e;
       })
     }
 
     def writeInternal(iterator: Iterator[(K, V)], mapName: String): Unit = {
       val client: HazelcastInstance = getHazelcastConnection(conf.serverAddresses, rdd.id, conf)
       val map: ClientMapProxy[K, V] = getClientMapProxy(mapName, client)
-      iterator.grouped(conf.writeBatchSize).foreach((kv) => map.putAll(mapAsJavaMap(kv.toMap)))
+      iterator.grouped(conf.writeBatchSize).foreach((kv) => Try(map.putAll(mapAsJavaMap(kv.toMap))).recover({
+        case e: Exception => e.printStackTrace();
+      }))
     }
   }
 
