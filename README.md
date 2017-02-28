@@ -204,7 +204,7 @@ You can find the code samples for Hazelcast Spark Connector at https://github.co
 
 # Testing
 
-Run `sbt test` command to execute the test suite.
+Run `./sbt clean test` command to execute the test suite.
 
 # Known Limitations
 
