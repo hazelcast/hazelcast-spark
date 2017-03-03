@@ -29,6 +29,7 @@ Spark Connector for Hazelcast allows your Spark applications to connect to a Haz
 
 - Hazelcast 3.7.x
 - Apache Spark 1.6.1
+- Apache Spark 2.1.0 (Starting from v0.2)
 
 # Releases
 
