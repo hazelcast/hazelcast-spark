@@ -1,3 +1,6 @@
+**!!!This repository is not maintained anymore. please check [Hazelcast Jet](https://github.com/hazelcast/hazelcast-jet) instead.!!!**
+
+
 # Table of Contents
 
 * [Spark Connector for Hazelcast](#spark-connector-for-hazelcast-beta)
