@@ -1,6 +1,3 @@
-**!!!This repository is not maintained anymore.!!!**
-
-**!!!please check [Hazelcast Jet](https://github.com/hazelcast/hazelcast-jet) instead.!!!**
 
 
 # Table of Contents
@@ -25,6 +22,9 @@
 
 Spark Connector for Hazelcast allows your Spark applications to connect to a Hazelcast cluster with the Spark RDD API.
 
+# Related Project - Hazelcast Jet
+Spark integration is one of several Hazelcast Big Data projects. We also offer a High Performance Stream Processing Engine, [Hazelcast Jet](https://github.com/hazelcast/hazelcast-jet).
+
 # Features
 
 - Read/Write support for Hazelcast Maps
@@ -32,9 +32,9 @@ Spark Connector for Hazelcast allows your Spark applications to connect to a Haz
 
 # Requirements
 
-- Hazelcast 3.7.x
-- Apache Spark 1.6.1
-- Apache Spark 2.1.0 (Starting from v0.2)
+- Hazelcast 3.7.x or higher
+- Apache Spark 1.6.1 
+- Apache Spark 2.1.0 or higher
 
 # Releases
 
